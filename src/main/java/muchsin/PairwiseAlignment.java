@@ -11,8 +11,8 @@ public interface PairwiseAlignment {
         String querySeq = getQuerySeq();
         String refSeq = getReferenceSeq();
 
-        char[] queryChar = new char[backtrackPath[0].length];
-        char[] refChar = new char[backtrackPath[0].length];
+        char[] queryChar = new char[backtrackPath[0].length -1];
+        char[] refChar = new char[backtrackPath[0].length -1];
 
         for(int idx = 0; idx < backtrackPath[0].length-1; idx++) {
 
@@ -33,9 +33,7 @@ public interface PairwiseAlignment {
             }
         }
 
-        String[] alignment = {String.valueOf(queryChar), String.valueOf(refChar)};
-
-        return alignment;
+        return new String[]{String.valueOf(queryChar), String.valueOf(refChar)};
     }
 
     int[][] getScoringMatrix();

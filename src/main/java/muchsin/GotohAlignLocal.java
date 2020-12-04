@@ -1,6 +1,8 @@
 package muchsin;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class GotohAlignLocal implements PairwiseAlignment {
@@ -24,11 +26,11 @@ public class GotohAlignLocal implements PairwiseAlignment {
         HashMap<Character, Integer> alphabetIndex = subsMat.getAlphabetIndex();
 
         for(int idx = 1; idx < querySeq.length()+1; idx++) {
-            deletionScore[idx][0] = Integer.MIN_VALUE;
+            deletionScore[idx][0] = Integer.MIN_VALUE/2;
         }
 
         for(int idx = 1; idx < refSeq.length()+1; idx++) {
-            insertionScore[0][idx] = Integer.MIN_VALUE;
+            insertionScore[0][idx] = Integer.MIN_VALUE/2;
         }
 
         for(int idx_i = 1; idx_i < querySeq.length()+1; idx_i++) {
@@ -58,6 +60,15 @@ public class GotohAlignLocal implements PairwiseAlignment {
         this.insertionScoreMatrix = insertionScore;
         this.deletionScoreMatrix = deletionScore;
         this.substitutionScoreMatrix = substitutionScore;
+
+        for (int[] x : substitutionScore)
+        {
+            for (int y : x)
+            {
+                System.out.print(y + "\t");
+            }
+            System.out.println();
+        }
 
     }
 
@@ -129,19 +140,15 @@ public class GotohAlignLocal implements PairwiseAlignment {
             int idx_i = traceIdxs[0][idx];
             int idx_j = traceIdxs[1][idx];
 
-            ArrayList<ArrayList<Integer>> altPaths = backTrack(new ArrayList<>(), new ArrayList<>(), idx_i, idx_j);
+            ArrayList<Integer> path = backTrack(idx_i, idx_j);
 
-            for(ArrayList<Integer> path: altPaths) {
-
-                int[][] backPath = new int[2][path.size()/2];
-                for(int pos = path.size()-1; pos >= 0; pos=pos-2){
-                    backPath[0][(pos-1)/2] = path.get(pos-1);
-                    backPath[1][(pos-1)/2] = path.get(pos);
-                }
-
-                backtrackPath.add(backPath);
-
+            int[][] backPath = new int[2][path.size()/2];
+            for(int pos = path.size(); pos > 0; pos=pos-2){
+                backPath[0][(pos/2)-1] = path.get(path.size() - pos);
+                backPath[1][(pos/2)-1] = path.get(path.size() - pos + 1);
             }
+
+            backtrackPath.add(backPath);
 
         }
 
@@ -149,13 +156,9 @@ public class GotohAlignLocal implements PairwiseAlignment {
 
     }
 
-    private ArrayList<ArrayList<Integer>> backTrack(ArrayList<ArrayList<Integer>> tempResult,
-                                                    ArrayList<Integer> tempPath,
-                                                    int idx_i, int idx_j) {
+    private ArrayList<Integer> backTrack(int idx_i, int idx_j) {
 
-        if(this.substitutionScoreMatrix[idx_i][idx_j] == 0) {
-            tempResult.add(tempPath);
-        }
+        ArrayList<Integer> tempPath = new ArrayList<>();
 
         while(this.substitutionScoreMatrix[idx_i][idx_j] > 0) {
 
@@ -163,29 +166,25 @@ public class GotohAlignLocal implements PairwiseAlignment {
             tempPath.add(idx_j);
 
             if(this.substitutionScoreMatrix[idx_i][idx_j] == this.insertionScoreMatrix[idx_i][idx_j]) {
-                backTrack(tempResult, tempPath, idx_i-1, idx_j);
-            }
-
-            if(this.substitutionScoreMatrix[idx_i][idx_j] == this.deletionScoreMatrix[idx_i][idx_j]) {
-                backTrack(tempResult, tempPath, idx_i, idx_j-1);
-            }
-
-            if((this.substitutionScoreMatrix[idx_i][idx_j] != this.insertionScoreMatrix[idx_i][idx_j]) &&
-                    (this.substitutionScoreMatrix[idx_i][idx_j] != this.deletionScoreMatrix[idx_i][idx_j])) {
+                idx_i--;
+            } else if(this.substitutionScoreMatrix[idx_i][idx_j] == this.deletionScoreMatrix[idx_i][idx_j]) {
+                idx_j--;
+            } else {
 
                 if(idx_i==0) {
-                    backTrack(tempResult, tempPath, idx_i, idx_j-1);
+                    idx_j--;
                 } else if (idx_j==0) {
-                    backTrack(tempResult, tempPath, idx_i-1, idx_j);
+                    idx_i--;
                 } else {
-                    backTrack(tempResult, tempPath, idx_i-1, idx_j-1);
+                    idx_i--;
+                    idx_j--;
                 }
 
             }
 
         }
-
-        return tempResult;
+        System.out.println(Arrays.toString(tempPath.toArray()));
+        return tempPath;
 
     }
 
