@@ -1,5 +1,7 @@
 package muchsin;
 
+import java.util.ArrayList;
+
 public interface PairwiseAlignment {
 
     PairwiseAlignment align(String querySeq, String refSeq, ScoringMatrix subsMat, int gapOpen, int gapExtend);
@@ -35,7 +37,7 @@ public interface PairwiseAlignment {
 
     int[][] getScoringMatrix();
     int getScore();
-    void backtracking();
+    ArrayList<int[][]> backtracking();
     void computeScoreMatrix(String querySeq, String refSeq, ScoringMatrix subsMat, int gapOpen, int gapExtend);
 
 }

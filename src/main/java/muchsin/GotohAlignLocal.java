@@ -1,5 +1,6 @@
 package muchsin;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GotohAlignLocal implements PairwiseAlignment {
@@ -8,7 +9,7 @@ public class GotohAlignLocal implements PairwiseAlignment {
     int[][] insertionScoreMatrix;
     int[][] deletionScoreMatrix;
     int[][] substitutionScoreMatrix;
-    String[] alignment;
+    String[][] alignments;
     String querySequence;
     String referenceSequence;
 
@@ -83,8 +84,85 @@ public class GotohAlignLocal implements PairwiseAlignment {
         return maxVal;
     }
 
+    private int[][] findValue2D(int[][] arr, int searchVal) {
 
-    public void backtracking(){
+        ArrayList<Integer> valIdx1 = new ArrayList<Integer>();
+        ArrayList<Integer> valIdx2 = new ArrayList<Integer>();
+
+        for(int idx_i=0; idx_i<arr.length; idx_i++) {
+            for(int idx_j=0; idx_j<arr[idx_i].length; idx_j++) {
+                if(arr[idx_i][idx_j] == searchVal) {
+                    valIdx1.add(idx_i);
+                    valIdx2.add(idx_j)
+                }
+            }
+        }
+
+        int[][] valIdx = new int[2][valIdx1.size()];
+        for(int idx = 0; idx < valIdx1.size(); idx++) {
+            valIdx[0][idx] =valIdx1.get(idx);
+            valIdx[1][idx] =valIdx2.get(idx);
+        }
+
+        return valIdx;
+    }
+
+    public ArrayList<int[][]> backtracking(){
+
+        int[][] traceIdxs = findValue2D(this.substitutionScoreMatrix, this.score);
+
+        ArrayList<int[][]> backtrackPath = new ArrayList<>();
+        for(int idx=0; idx<traceIdxs[0].length; idx++) {
+
+            int traceScore = this.score;
+
+            int idx_i = traceIdxs[0][idx];
+            int idx_j = traceIdxs[1][idx];
+
+            ArrayList<ArrayList<Integer>> altPaths = backTrack(new ArrayList<>(), new ArrayList<>(), idx_i, idx_j);
+
+            
+        }
+
+    }
+
+    private ArrayList<ArrayList<Integer>> backTrack(ArrayList<ArrayList<Integer>> tempResult,
+                                                    ArrayList<Integer> tempPath,
+                                                    int idx_i, int idx_j) {
+
+        if(this.substitutionScoreMatrix[idx_i][idx_j] == 0) {
+            tempResult.add(tempPath);
+        }
+
+        while(this.substitutionScoreMatrix[idx_i][idx_j] > 0) {
+
+            tempPath.add(idx_i);
+            tempPath.add(idx_j);
+
+            if(this.substitutionScoreMatrix[idx_i][idx_j] == this.insertionScoreMatrix[idx_i][idx_j]) {
+                backTrack(tempResult, tempPath, idx_i-1, idx_j);
+            }
+
+            if(this.substitutionScoreMatrix[idx_i][idx_j] == this.deletionScoreMatrix[idx_i][idx_j]) {
+                backTrack(tempResult, tempPath, idx_i, idx_j-1);
+            }
+
+            if((this.substitutionScoreMatrix[idx_i][idx_j] != this.insertionScoreMatrix[idx_i][idx_j]) &&
+                    (this.substitutionScoreMatrix[idx_i][idx_j] != this.deletionScoreMatrix[idx_i][idx_j])) {
+
+                if(idx_i==0) {
+                    backTrack(tempResult, tempPath, idx_i, idx_j-1);
+                } else if (idx_j==0) {
+                    backTrack(tempResult, tempPath, idx_i-1, idx_j);
+                } else {
+                    backTrack(tempResult, tempPath, idx_i-1, idx_j-1);
+                }
+
+            }
+
+        }
+
+        return tempResult;
 
     }
 
