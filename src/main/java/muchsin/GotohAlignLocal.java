@@ -61,7 +61,19 @@ public class GotohAlignLocal implements PairwiseAlignment {
 
     }
 
-    private int maxIntArray(int[] arr) {
+    public String getQuerySeq() {
+        return this.querySequence;
+    }
+
+    public String getReferenceSeq() {
+        return this.referenceSequence;
+    }
+
+    public String[][] getAlignments() {
+        return this.alignments;
+    }
+
+    private static int maxIntArray(int[] arr) {
         int maxVal = arr[0];
         for(int val: arr) {
             if(val > maxVal) {
@@ -71,7 +83,7 @@ public class GotohAlignLocal implements PairwiseAlignment {
         return maxVal;
     }
 
-    private int maxIntArray2D(int[][] arr) {
+    private static int maxIntArray2D(int[][] arr) {
         int maxVal = arr[0][0];
         for(int[] vals: arr) {
             for(int val: vals) {
@@ -84,16 +96,16 @@ public class GotohAlignLocal implements PairwiseAlignment {
         return maxVal;
     }
 
-    private int[][] findValue2D(int[][] arr, int searchVal) {
+    private static int[][] findValue2D(int[][] arr, int searchVal) {
 
-        ArrayList<Integer> valIdx1 = new ArrayList<Integer>();
-        ArrayList<Integer> valIdx2 = new ArrayList<Integer>();
+        ArrayList<Integer> valIdx1 = new ArrayList<>();
+        ArrayList<Integer> valIdx2 = new ArrayList<>();
 
         for(int idx_i=0; idx_i<arr.length; idx_i++) {
             for(int idx_j=0; idx_j<arr[idx_i].length; idx_j++) {
                 if(arr[idx_i][idx_j] == searchVal) {
                     valIdx1.add(idx_i);
-                    valIdx2.add(idx_j)
+                    valIdx2.add(idx_j);
                 }
             }
         }
@@ -114,15 +126,26 @@ public class GotohAlignLocal implements PairwiseAlignment {
         ArrayList<int[][]> backtrackPath = new ArrayList<>();
         for(int idx=0; idx<traceIdxs[0].length; idx++) {
 
-            int traceScore = this.score;
-
             int idx_i = traceIdxs[0][idx];
             int idx_j = traceIdxs[1][idx];
 
             ArrayList<ArrayList<Integer>> altPaths = backTrack(new ArrayList<>(), new ArrayList<>(), idx_i, idx_j);
 
-            
+            for(ArrayList<Integer> path: altPaths) {
+
+                int[][] backPath = new int[2][path.size()/2];
+                for(int pos = path.size()-1; pos >= 0; pos=pos-2){
+                    backPath[0][(pos-1)/2] = path.get(pos-1);
+                    backPath[1][(pos-1)/2] = path.get(pos);
+                }
+
+                backtrackPath.add(backPath);
+
+            }
+
         }
+
+        return backtrackPath;
 
     }
 
@@ -167,14 +190,25 @@ public class GotohAlignLocal implements PairwiseAlignment {
     }
 
     public int[][] getScoringMatrix() {
-        return new int[0][];
+        return this.substitutionScoreMatrix;
     }
 
     public int getScore() {
-        return 0;
+        return this.score;
     }
 
-    public PairwiseAlignment align(String querySeq, String refSeq, ScoringMatrix subsMat, int gapOpen, int gapExtend) {
-        return null;
+    public void align(String querySeq, String refSeq, ScoringMatrix subsMat, int gapOpen, int gapExtend) {
+
+        computeScoreMatrix(querySeq, refSeq, subsMat, gapOpen, gapExtend);
+        ArrayList<int[][]> backtrackPath = backtracking();
+
+        String[][] alignments = new String[backtrackPath.size()][2];
+
+        for(int idx=0; idx < backtrackPath.size(); idx++) {
+            String[] alignSeq = buildAlignment(backtrackPath.get(idx));
+            alignments[idx] = alignSeq;
+        }
+
+        this.alignments = alignments;
     }
 }

@@ -4,9 +4,12 @@ import java.util.ArrayList;
 
 public interface PairwiseAlignment {
 
-    PairwiseAlignment align(String querySeq, String refSeq, ScoringMatrix subsMat, int gapOpen, int gapExtend);
+    void align(String querySeq, String refSeq, ScoringMatrix subsMat, int gapOpen, int gapExtend);
 
-    default String[] getAlignment(String querySeq, String refSeq, int[][] backtrackPath) {
+    default String[] buildAlignment(int[][] backtrackPath) {
+
+        String querySeq = getQuerySeq();
+        String refSeq = getReferenceSeq();
 
         char[] queryChar = new char[backtrackPath[0].length];
         char[] refChar = new char[backtrackPath[0].length];
@@ -39,5 +42,8 @@ public interface PairwiseAlignment {
     int getScore();
     ArrayList<int[][]> backtracking();
     void computeScoreMatrix(String querySeq, String refSeq, ScoringMatrix subsMat, int gapOpen, int gapExtend);
+    String getQuerySeq();
+    String getReferenceSeq();
+    String[][] getAlignments();
 
 }
