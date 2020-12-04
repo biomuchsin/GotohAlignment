@@ -61,15 +61,6 @@ public class GotohAlignLocal implements PairwiseAlignment {
         this.deletionScoreMatrix = deletionScore;
         this.substitutionScoreMatrix = substitutionScore;
 
-        for (int[] x : substitutionScore)
-        {
-            for (int y : x)
-            {
-                System.out.print(y + "\t");
-            }
-            System.out.println();
-        }
-
     }
 
     public String getQuerySeq() {
@@ -179,13 +170,12 @@ public class GotohAlignLocal implements PairwiseAlignment {
                     idx_i--;
                     idx_j--;
                 }
-
             }
-
         }
-        System.out.println(Arrays.toString(tempPath.toArray()));
-        return tempPath;
+        tempPath.add(idx_i);
+        tempPath.add(idx_j);
 
+        return tempPath;
     }
 
     public int[][] getScoringMatrix() {

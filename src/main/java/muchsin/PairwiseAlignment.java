@@ -44,4 +44,32 @@ public interface PairwiseAlignment {
     String getReferenceSeq();
     String[][] getAlignments();
 
+    default int[][] countMutation() {
+
+        int[][] mutationCounter = new int[getAlignments().length][3];
+        for(int idx = 0; idx < getAlignments().length; idx++) {
+
+            int synonimous = 0;
+            int nonsynonimous = 0;
+            int numGap = 0;
+
+            for(int idx_char=0; idx_char < getAlignments()[idx][0].length(); idx_char++) {
+               if(getAlignments()[idx][0].charAt(idx_char) == getAlignments()[idx][1].charAt(idx_char)) {
+                   synonimous++;
+               } else {
+
+                   if((getAlignments()[idx][0].charAt(idx_char) == '-') || (getAlignments()[idx][1].charAt(idx_char) == '-')) {
+                       numGap++;
+                   } else {
+                       nonsynonimous++;
+                   }
+               }
+            }
+            mutationCounter[idx] = new int[]{synonimous,nonsynonimous, numGap};
+        }
+
+        return mutationCounter;
+
+    }
+
 }
